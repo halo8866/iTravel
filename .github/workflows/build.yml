@@ -74,7 +74,11 @@ jobs:
       - name: 重命名 APK
         if: success()
         run: |
-          mv app/build/outputs/apk/debug/app-debug.apk "app/build/outputs/apk/debug/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
+          echo "=== APK 目录内容 ==="
+          ls -la app/build/outputs/apk/debug/
+          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          echo "Found APK: $APK"
+          mv "$APK" "app/build/outputs/apk/debug/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
 
       - name: Upload APK artifact
         if: success()
