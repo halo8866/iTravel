@@ -11,26 +11,26 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /opt/android-sdk
+      ANDROID_SDK_ROOT: /opt/android-sdk
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 需要完整的 tag 历史
+          fetch-depth: 0
 
       - name: 计算版本号
         id: version
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
           echo "Latest tag: $LATEST_TAG"
-
           VERSION=${LATEST_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-
           PATCH=$((PATCH + 1))
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-
           VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
-
           echo "VERSION_NAME=${NEW_VERSION}" >> $GITHUB_OUTPUT
           echo "VERSION_CODE=${VERSION_CODE}" >> $GITHUB_OUTPUT
           echo "TAG_NAME=v${NEW_VERSION}" >> $GITHUB_OUTPUT
@@ -42,6 +42,17 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
+      - name: Setup Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          # ubuntu-latest 已预装 SDK，确认路径
+          ls -la /opt/android-sdk 2>/dev/null || ls -la $ANDROID_HOME 2>/dev/null || echo "checking preinstalled"
+          # 接受所有 license
+          yes | sdkmanager --licenses || true
+          # 确保 build-tools 和 platform 可用
+          sdkmanager "build-tools;35.0.0" "platforms;android-34" 2>/dev/null || true
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -49,7 +60,9 @@ jobs:
         env:
           VERSION_CODE: ${{ steps.version.outputs.VERSION_CODE }}
           VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
-        run: ./gradlew assembleDebug --console=plain
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --console=plain --stacktrace
 
       - name: 重命名 APK
         run: |
