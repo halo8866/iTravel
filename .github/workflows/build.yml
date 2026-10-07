@@ -39,13 +39,6 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: 检查环境
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "JAVA_HOME=$JAVA_HOME"
-          java -version
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
@@ -55,40 +48,9 @@ jobs:
           VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --console=plain --stacktrace 2>&1 | tee build-output.log
-          echo "=== BUILD EXIT: ${PIPESTATUS[0]} ==="
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "=== BUILD FAILED, last 80 lines ==="
-            tail -n 80 build-output.log
-            exit 1
-          fi
-
-      - name: 上传构建日志（失败时）
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build-output.log
-          retention-days: 7
-
-      - name: 重命名 APK
-        if: success()
-        run: |
-          echo "=== 查找所有 APK ==="
-          find . -name "*.apk" -type f 2>/dev/null
-          APK=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
-          if [ -z "$APK" ]; then
-            echo "ERROR: No APK found"
-            find . -path "*/outputs/*" -type f 2>/dev/null | head -30
-            exit 1
-          fi
-          echo "Found APK: $APK"
-          DIR=$(dirname "$APK")
-          mv "$APK" "$DIR/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
-          echo "Renamed to: $DIR/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
+          ./gradlew assembleDebug --console=plain
 
       - name: Upload APK artifact
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: itravel-${{ steps.version.outputs.VERSION_NAME }}-debug
@@ -96,7 +58,6 @@ jobs:
           retention-days: 30
 
       - name: Create Release
-        if: success()
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -114,7 +75,6 @@ jobs:
           prerelease: false
 
       - name: Upload Release Asset
-        if: success()
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

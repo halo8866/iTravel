@@ -28,6 +28,15 @@ android {
         }
     }
 
+    applicationVariants.all {
+        val variant = this
+        variant.outputs.all {
+            val output = this as com.android.build.gradle.internal.api.ApkVariantOutputImpl
+            val versionName = variant.versionName
+            output.outputFileName = "itravel-${versionName}-debug.apk"
+        }
+    }
+
     buildFeatures {
         compose = true
     }
