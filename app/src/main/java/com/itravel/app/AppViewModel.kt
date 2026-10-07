@@ -26,6 +26,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         longitude: Double,
         notes: String?,
         visitDate: Long,
+        sortDate: Long,
         photoPaths: List<String>,
         onDone: () -> Unit = {}
     ) {
@@ -40,6 +41,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                         longitude = longitude,
                         notes = notes?.takeIf { it.isNotBlank() },
                         visitDate = visitDate,
+                        sortDate = sortDate,
                         coverPath = cover
                     )
                 )
@@ -57,6 +59,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                         longitude = longitude,
                         notes = notes?.takeIf { it.isNotBlank() },
                         visitDate = visitDate,
+                        sortDate = sortDate,
                         coverPath = cover
                     )
                 )

@@ -23,7 +23,8 @@ data class Place(
     val notes: String? = null,
     val visitDate: Long = System.currentTimeMillis(),
     val coverPath: String? = null,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val sortDate: Long = System.currentTimeMillis()
 )
 
 @Entity(
@@ -58,7 +59,7 @@ data class PlaceWithPhotos(
 interface PlaceDao {
 
     @Transaction
-    @Query("SELECT * FROM places ORDER BY visitDate DESC, createdAt DESC")
+    @Query("SELECT * FROM places ORDER BY sortDate DESC, createdAt DESC")
     fun observeAll(): kotlinx.coroutines.flow.Flow<List<PlaceWithPhotos>>
 
     @Query("SELECT * FROM places WHERE id = :id")

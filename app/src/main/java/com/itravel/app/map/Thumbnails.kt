@@ -24,7 +24,7 @@ import kotlin.math.min
  */
 object Thumbnails {
 
-    private const val TARGET_DP = 88
+    private const val TARGET_DP = 48
 
     private val cache = object : LruCache<String, Bitmap>(48) {
         override fun sizeOf(key: String, value: Bitmap): Int = 1
