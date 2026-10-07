@@ -48,24 +48,7 @@ jobs:
           VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
         run: |
           chmod +x ./gradlew
-          set +e
-          ./gradlew assembleDebug --console=plain --stacktrace 2>&1 | tee build-output.log
-          EXIT=${PIPESTATUS[0]}
-          set -e
-          if [ $EXIT -ne 0 ]; then
-            echo "=== BUILD FAILED (exit $EXIT) ==="
-            # 用 ::error:: 格式输出关键错误，方便通过 API 读取
-            grep -iE "error:|exception|FAILURE:|What went wrong|Caused by" build-output.log | head -30 | while read line; do
-              echo "::error::$line"
-            done
-            echo "::error::=== 完整错误（最后60行）==="
-            tail -n 60 build-output.log | while read line; do
-              echo "::error::$line"
-            done
-            exit $EXIT
-          fi
-          echo "=== APK 输出 ==="
-          find . -name "*.apk" -type f
+          ./gradlew assembleDebug --console=plain
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
