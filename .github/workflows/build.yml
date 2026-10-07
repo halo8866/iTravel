@@ -20,19 +20,15 @@ jobs:
       - name: 计算版本号
         id: version
         run: |
-          # 获取最新的 tag，如 v1.0.5；若无则用基础版本 v1.0.0
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
           echo "Latest tag: $LATEST_TAG"
 
-          # 去掉 v 前缀，按 . 分割
           VERSION=${LATEST_TAG#v}
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 
-          # patch +1
           PATCH=$((PATCH + 1))
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
-          # versionCode 用数字拼接，如 10005
           VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
 
           echo "VERSION_NAME=${NEW_VERSION}" >> $GITHUB_OUTPUT
@@ -46,13 +42,8 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: false
 
       - name: Build debug APK
         env:
