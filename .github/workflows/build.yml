@@ -74,11 +74,18 @@ jobs:
       - name: 重命名 APK
         if: success()
         run: |
-          echo "=== APK 目录内容 ==="
-          ls -la app/build/outputs/apk/debug/
-          APK=$(ls app/build/outputs/apk/debug/*.apk | head -1)
+          echo "=== 查找所有 APK ==="
+          find . -name "*.apk" -type f 2>/dev/null
+          APK=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            echo "ERROR: No APK found"
+            find . -path "*/outputs/*" -type f 2>/dev/null | head -30
+            exit 1
+          fi
           echo "Found APK: $APK"
-          mv "$APK" "app/build/outputs/apk/debug/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
+          DIR=$(dirname "$APK")
+          mv "$APK" "$DIR/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
+          echo "Renamed to: $DIR/itravel-${{ steps.version.outputs.VERSION_NAME }}-debug.apk"
 
       - name: Upload APK artifact
         if: success()
