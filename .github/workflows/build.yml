@@ -53,10 +53,12 @@ jobs:
           EXIT=${PIPESTATUS[0]}
           set -e
           if [ $EXIT -ne 0 ]; then
-            echo "=== BUILD FAILED (exit $EXIT), last 100 lines ==="
-            tail -n 100 build-output.log
+            echo "=== BUILD FAILED (exit $EXIT), errors below ==="
+            grep -iE "error|exception|fail|cannot|could not|unable" build-output.log | tail -50
             exit $EXIT
           fi
+          echo "=== APK 输出 ==="
+          find . -name "*.apk" -type f
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
