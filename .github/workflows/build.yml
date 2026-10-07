@@ -55,11 +55,16 @@ jobs:
           VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --console=plain 2>&1 | tee build-output.log
-          echo "BUILD_EXIT=$?" >> $GITHUB_ENV
+          ./gradlew assembleDebug --console=plain --stacktrace 2>&1 | tee build-output.log
+          echo "=== BUILD EXIT: ${PIPESTATUS[0]} ==="
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "=== BUILD FAILED, last 80 lines ==="
+            tail -n 80 build-output.log
+            exit 1
+          fi
 
       - name: 上传构建日志（失败时）
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
