@@ -48,7 +48,15 @@ jobs:
           VERSION_NAME: ${{ steps.version.outputs.VERSION_NAME }}
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug --console=plain
+          set +e
+          ./gradlew assembleDebug --console=plain --stacktrace 2>&1 | tee build-output.log
+          EXIT=${PIPESTATUS[0]}
+          set -e
+          if [ $EXIT -ne 0 ]; then
+            echo "=== BUILD FAILED (exit $EXIT), last 100 lines ==="
+            tail -n 100 build-output.log
+            exit $EXIT
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
